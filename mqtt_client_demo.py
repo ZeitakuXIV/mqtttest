@@ -21,16 +21,15 @@ def on_connect(client, userdata, flags, rc):
     # Subscribing in on_connect() - if we lose the connection and
     # reconnect then subscriptions will be renewed.
     client.subscribe(client.topic,qos=2)
-
-def on_publish(client,userdata,result):
-	print("data published \n")
         
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload.decode('utf-8')))
+    if client.topic_pub == '':
+        print("response from "+msg.topic+" "+str(msg.payload.decode('utf-8'))+"\n")
     message = str(msg.payload.decode('utf-8'))
     if client.topic_pub != '':
         ret = client.publish(client.topic_pub,payload=message,qos=1)
+        print(f"data published to {client.topic_pub}\n")
 
 # Create an MQTT client and attach our routines to it.
 
@@ -41,7 +40,6 @@ def publish(topic, topic_pub):
     client.username_pw_set(username=username,password=password)
     client.on_connect = on_connect
     client.on_message = on_message
-    client.on_publish = on_publish
     client.connect(broker, port, timeout)
     client.loop_forever()
 
